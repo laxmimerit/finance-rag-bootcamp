@@ -1,0 +1,50 @@
+# What the LLM extracts from each filing at ingest time.
+#
+# The instructions live in the prompt, not in the field descriptions, because
+# the model follows prompt text far more reliably than schema descriptions.
+# Only the cover page is needed, so char_limit stays small: less text, fewer
+# distractions, better extraction.
+
+prompt: |
+  You are reading the cover page of an SEC filing. Extract the four fields
+  below. Copy values from the page, never from your own knowledge of the
+  company. If a value is not printed on the page, return null for it. Never
+  guess.
+
+  1. company_name: the registrant's legal name, printed directly above the
+     line starting with "Exact name of registrant". Rules:
+     - lowercase the whole name, keep the punctuation exactly as printed
+     - keep legal suffixes such as "inc." or "corp.", add or drop nothing
+     - never return a ticker symbol, a brand name, or a shortened form
+     Example: meta platforms, inc.
+  2. doc_type: the form type printed near the top, such as "FORM 10-K".
+     Return exactly one of these lowercase values and nothing else:
+     10-k, 10-q, 8-k.
+  3. fiscal_quarter: only for a 10-Q, the quarter the report covers. Return
+     exactly one of: q1, q2, q3, q4. For a 10-K or an 8-K return null.
+  4. fiscal_year: the 4 digit year from the line starting with "For the
+     fiscal year ended" on a 10-K, or "For the quarterly period ended" on a
+     10-Q. Return it as an integer, for example: 2024. Never use the filing
+     date, a copyright year, or any other date on the page.
+
+  These values become exact-match search filters, so the same document must
+  always produce the same values. When two spellings seem possible, copy the
+  page exactly and lowercase it.
+
+char_limit: 3000
+
+fields:
+  - name: company_name
+    description: The registrant's legal name in lowercase
+    type: string
+  - name: doc_type
+    description: The SEC form type
+    type: string
+    values: ["10-k", "10-q", "8-k"]
+  - name: fiscal_quarter
+    description: The quarter a 10-Q covers, null for 10-K filings
+    type: string
+    values: ["q1", "q2", "q3", "q4"]
+  - name: fiscal_year
+    description: The fiscal year the filing covers, a 4 digit integer
+    type: integer

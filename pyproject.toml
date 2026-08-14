@@ -1,0 +1,34 @@
+[project]
+name = "finance-rag-bootcamp"
+version = "1.0.0"
+description = "Production-grade RAG for finance documents, fully local: Ollama + Qdrant + RAGWire"
+readme = "README.md"
+# Pinned to 3.12, the version the notebook was verified on, and not a range.
+# uv downloads it automatically, so pinning costs a student nothing and means
+# everyone runs the same interpreter.
+requires-python = ">=3.12,<3.13"
+authors = [{ name = "Laxmi Kant Tiwari", email = "laxmimerit@gmail.com" }]
+
+dependencies = [
+    # The whole pipeline in one config file. The extras pull in:
+    #   ollama    -> langchain-ollama, for nomic-embed-text and nemotron-3.5-lightning
+    #   rerank    -> sentence-transformers, the local cross-encoder reranker
+    #   fastembed -> the sparse BM25 model that powers hybrid search
+    #   mcp       -> the MCP server, so Claude can use the collection as a tool
+    "ragwire[ollama,rerank,fastembed,mcp]",
+    # Running the notebook
+    "jupyter",
+    "ipykernel",
+    # Makes Python trust the operating system's certificate store. On a machine
+    # behind a TLS-inspecting proxy, which is normal on a corporate laptop,
+    # every HTTPS download otherwise hangs until it times out. The reranker and
+    # sparse models download over HTTPS on first use, so this is cheap insurance.
+    "truststore",
+    "chainlit>=2.11.1",
+    "langgraph-checkpoint-sqlite>=3.1.1",
+]
+
+[tool.uv]
+# Not a library. There is nothing here to build or install, only an
+# environment to reproduce, so uv should not try to package the project.
+package = false

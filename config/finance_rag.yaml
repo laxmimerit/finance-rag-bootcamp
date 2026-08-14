@@ -1,0 +1,52 @@
+# Fully local pipeline: Ollama runs the model and the embeddings, Qdrant holds
+# the vectors. No API key needed; the only key in .env is for LangSmith tracing.
+
+# Which file types to pick up when scanning a directory
+loader:
+  extensions: [".pdf", ".docx", ".xlsx", ".pptx", ".txt", ".md"]
+
+# How documents are cut into chunks: exactly one chunk per PDF page
+splitter:
+  strategy: "page"       # also: "markdown", "recursive" (those use chunk_size)
+  # page_marker: "<!-- pagebreak -->"  # page separator in .txt/.md files
+
+# Turns chunks into vectors
+embeddings:
+  provider: "ollama"     # also: openai, openrouter, huggingface, google, fastembed
+  model: "nomic-embed-text"
+  base_url: "http://localhost:11434"
+
+# Extracts metadata at ingest and writes the answers in query(). Required.
+llm:
+  provider: "ollama"     # also: openai, openrouter, google, groq, anthropic
+  model: "nemotron-3.5-lightning"
+  base_url: "http://localhost:11434"
+  num_ctx: 65536         # room for retrieved context plus the prompt
+
+# What the LLM extracts from each document. Since ragwire 1.6.1 a relative
+# path resolves against this file's directory, wherever the launch happens.
+metadata:
+  config_file: "metadata.yaml"
+
+# Where the vectors live
+vectorstore:
+  url: "http://localhost:6333"
+  collection_name: "finance-rag-bootcamp"
+  use_sparse: true       # hybrid search, needs fastembed
+  force_recreate: false  # true wipes the collection on startup. Leave false.
+
+# How chunks get written
+ingestion:
+  dedup_chunks: true     # filings repeat boilerplate, drop exact duplicates
+
+# How chunks come back out
+retriever:
+  search_type: "hybrid"  # "similarity", "mmr" or "hybrid"
+  top_k: 4
+  auto_filter: false     # true lets the LLM derive metadata filters per query
+  # rerank:              # optional second stage, covered in the slides
+  #   provider: "cross_encoder"
+
+# How much retrieved text query() may pass to the LLM
+generation:
+  max_context_chars: 30000  # a 10-K page can run 6000 chars, top_k of them must fit
