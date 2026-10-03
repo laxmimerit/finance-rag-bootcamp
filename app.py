@@ -19,7 +19,7 @@ from langgraph.checkpoint.sqlite import SqliteSaver
 from scripts.agent import stream_agent
 from scripts.tools import get_filter_context, search_documents
 
-model = ChatOllama(model="nemotron-3.5-lightning", base_url="http://localhost:11434")
+model = ChatOllama(model="qwen3.8:27B", base_url="http://localhost:11434")
 
 Path("db").mkdir(exist_ok=True)
 conn = sqlite3.connect("db/chainlit_memory.db", check_same_thread=False)

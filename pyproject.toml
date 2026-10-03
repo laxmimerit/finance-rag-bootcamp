@@ -11,7 +11,7 @@ authors = [{ name = "Laxmi Kant Tiwari", email = "laxmimerit@gmail.com" }]
 
 dependencies = [
     # The whole pipeline in one config file. The extras pull in:
-    #   ollama    -> langchain-ollama, for nomic-embed-text and nemotron-3.5-lightning
+    #   ollama    -> langchain-ollama, for nomic-embed-text and qwen3.8:27B
     #   rerank    -> sentence-transformers, the local cross-encoder reranker
     #   fastembed -> the sparse BM25 model that powers hybrid search
     #   mcp       -> the MCP server, so Claude can use the collection as a tool

@@ -1,7 +1,7 @@
 # Production-Grade RAG for Finance
 
-Bootcamp resources. A fully local RAG pipeline over real SEC filings:
-Ollama runs the model (`nemotron-3.5-lightning`) and the embeddings (`nomic-embed-text`),
+Live bootcamp resources. A fully local RAG pipeline over real SEC filings:
+Ollama runs the model (`qwen3.8:27B`) and the embeddings (`nomic-embed-text`),
 Qdrant holds the vectors, RAGWire wires it together, and Chainlit puts a chat
 UI on top. The only API key in the project is for LangSmith tracing.
 
@@ -10,7 +10,7 @@ UI on top. The only API key in the project is for LangSmith tracing.
 1. Install [Ollama](https://ollama.com) and pull the two models:
 
 ```bash
-ollama pull nemotron-3.5-lightning
+ollama pull qwen3.8:27B
 ```
 
 ```bash
@@ -42,7 +42,7 @@ docker compose up -d
 6. After the notebook has ingested the filings, launch the chat UI:
 
 ```bash
-uv run chainlit run app.py
+uv run chainlit run app.py -w
 ```
 
 ## What is here
@@ -59,22 +59,21 @@ finance-rag-bootcamp/
 │   ├── chunking.py              one chunk per page (ragwire 1.6 page strategy)
 │   ├── embeddings.py            nomic-embed-text via Ollama
 │   ├── pipeline.py              get_rag(), used by the notebook and app.py
-│   ├── tools.py                 the agent's tools: get_filter_context,
-│   │                            search_documents
-│   └── agent.py                 stream_agent(), one streaming loop shared by
-│                                the notebook and the Chainlit app
+│   └── tools.py                 the agent's tools: get_filter_context,
+│                                search_documents
 ├── db/                          the agent's SQLite memory, created on first run
 ├── config/finance_rag.yaml      the whole pipeline in one file
-├── data/                        2024 10-K filings: Amazon, Alphabet
-├── RAG_Design_Slides.pdf        the session slides
-└── docker-compose.yml           one service: Qdrant on 6333
+├── data/                        2024 10-K filings: Amazon, Alphabet, Meta
+├── docker-compose.yml           one service: Qdrant on 6333
+├── src/                         notebook source, built by tools/build_notebook.py
+└── tools/
 ```
 
 ## Troubleshooting
 
 - `Connection refused` on 6333: the Qdrant container is not running.
   `docker compose up -d` from this directory.
-- First ingestion is the slow step: each filing is converted, chunked,
+- First ingestion is the slow step: three filings are converted, chunked,
   embedded, and each one gets an LLM metadata pass. Re-running is fast,
   because unchanged files are hash-skipped.
 - The model needs roughly 25 GB of memory. On a smaller machine, change

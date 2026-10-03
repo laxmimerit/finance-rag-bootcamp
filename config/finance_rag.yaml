@@ -19,7 +19,7 @@ embeddings:
 # Extracts metadata at ingest and writes the answers in query(). Required.
 llm:
   provider: "ollama"     # also: openai, openrouter, google, groq, anthropic
-  model: "nemotron-3.5-lightning"
+  model: "qwen3.8:27B"
   base_url: "http://localhost:11434"
   num_ctx: 65536         # room for retrieved context plus the prompt
 
